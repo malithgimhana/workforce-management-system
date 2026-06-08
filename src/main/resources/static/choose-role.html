@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlexiWork — Join Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #EB1700; --red-600: #D11400; --red-700: #B51100;
+      --red-tint: #FFF1EF; --red-tint-2: #FFE3DE;
+      --ink: #1A1A1A; --ink-2: #3D3D3D;
+      --muted: #767676; --muted-2: #9A9A9A;
+      --line: #ECECEC; --line-2: #E2E2E2;
+      --surface: #F6F6F4; --white: #FFFFFF;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      min-height: 100vh; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      background:
+        radial-gradient(900px 600px at 92% -8%, rgba(255,100,60,.55) 0%, transparent 55%),
+        radial-gradient(700px 500px at 6% 108%, rgba(180,10,0,.35) 0%, transparent 55%),
+        linear-gradient(155deg, var(--red) 0%, var(--red-600) 50%, var(--red-700) 100%);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 48px 20px 64px;
+      position: relative;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1.5px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.3) 60%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.3) 60%, transparent 100%);
+    }
+
+    /* Floating background cards */
+    .bg-float { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-jc {
+      position: absolute; width: 200px;
+      background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 14px; padding: 14px 16px;
+      backdrop-filter: blur(2px); color: #fff;
+    }
+    .bg-jc .r1 { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .bg-jc .bdg {
+      font-size: 9.5px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 6px;
+      background: rgba(255,255,255,.18); color: rgba(255,255,255,.9);
+    }
+    .bg-jc .wage { font-size: 13px; font-weight: 800; color: rgba(255,255,255,.85); }
+    .bg-jc h5 { font-size: 13.5px; font-weight: 700; color: rgba(255,255,255,.9); }
+    .bg-jc .meta { font-size: 10.5px; color: rgba(255,255,255,.55); margin-top: 6px; }
+    .jf-1 { top:  6%; left:  2%; transform: rotate(-6deg); animation: jfloat1  9s ease-in-out infinite; }
+    .jf-2 { top: 52%; left:  1%; transform: rotate( 4deg); animation: jfloat2 11s ease-in-out infinite; }
+    .jf-3 { top:  9%; right: 2%; transform: rotate( 5deg); animation: jfloat2 10s ease-in-out infinite; }
+    .jf-4 { top: 56%; right: 1%; transform: rotate(-4deg); animation: jfloat1 12s ease-in-out infinite; animation-delay: -3s; }
+    @keyframes jfloat1 { 0%,100%{ transform: translateY(0) rotate(-6deg); } 50%{ transform: translateY(-14px) rotate(-6deg); } }
+    @keyframes jfloat2 { 0%,100%{ transform: translateY(0) rotate( 4deg); } 50%{ transform: translateY(-16px) rotate( 4deg); } }
+    @media (max-width: 1100px) { .bg-float { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .bg-jc { animation: none !important; } }
+
+    /* Page layout */
+    .page { position: relative; z-index: 1; width: 100%; max-width: 880px; }
+
+    /* Nav */
+    .top-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 52px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+    .brand-mark {
+      width: 44px; height: 44px; border-radius: 13px;
+      background: #fff; color: var(--red);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 16px; letter-spacing: -.5px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.22);
+    }
+    .brand-name { font-size: 22px; font-weight: 800; letter-spacing: -.5px; color: #fff; }
+    .nav-login {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 18px; border-radius: 999px;
+      background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.25);
+      color: #fff; font-size: 14px; font-weight: 700; text-decoration: none;
+      transition: background .15s;
+    }
+    .nav-login:hover { background: rgba(255,255,255,.22); }
+
+    /* Hero */
+    .hero { text-align: center; color: #fff; margin-bottom: 44px; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22);
+      padding: 7px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 600; letter-spacing: .2px;
+      margin-bottom: 22px; color: rgba(255,255,255,.95);
+    }
+    .hero-eyebrow .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #fff;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.25);
+    }
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 58px); font-weight: 800;
+      letter-spacing: -2px; line-height: 1.04;
+    }
+    .hero h1 em { font-style: normal; color: #FFD9CF; }
+    .hero p {
+      margin: 14px auto 0; max-width: 520px;
+      font-size: 17px; font-weight: 500; color: rgba(255,255,255,.85); line-height: 1.5;
+    }
+
+    /* Cards */
+    .cards-wrap { position: relative; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+    .option-card {
+      background: #fff; border-radius: 22px;
+      padding: 36px 32px 32px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.22), 0 4px 12px rgba(0,0,0,.10);
+      display: flex; flex-direction: column;
+      transition: transform .22s cubic-bezier(.22,.68,0,1.2), box-shadow .22s ease;
+      cursor: pointer; position: relative; overflow: hidden;
+      text-decoration: none;
+    }
+    .option-card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 32px 72px rgba(0,0,0,.28), 0 8px 20px rgba(0,0,0,.12);
+    }
+    .option-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    }
+    .option-card.employee::before { background: var(--red); }
+    .option-card.employer::before { background: var(--ink); }
+
+    .card-icon-wrap {
+      width: 68px; height: 68px; border-radius: 20px;
+      display: grid; place-items: center; margin-bottom: 24px;
+      position: relative;
+    }
+    .option-card.employee .card-icon-wrap { background: var(--red-tint); color: var(--red); }
+    .option-card.employer .card-icon-wrap { background: #F0F0EE; color: var(--ink); }
+
+    .card-badge {
+      position: absolute; top: -8px; right: -8px;
+      width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid #fff;
+      display: grid; place-items: center;
+    }
+    .option-card.employee .card-badge { background: var(--red); color: #fff; }
+    .option-card.employer .card-badge { background: var(--ink); color: #fff; }
+
+    .option-card h2 {
+      font-size: 22px; font-weight: 800; letter-spacing: -.6px;
+      color: var(--ink); line-height: 1.15;
+    }
+    .option-card .sub {
+      font-size: 14.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; flex: 1;
+    }
+
+    .stat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+    .stat-chip {
+      font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 999px;
+    }
+    .option-card.employee .stat-chip { background: var(--red-tint); color: var(--red); border: 1px solid var(--red-tint-2); }
+    .option-card.employer .stat-chip { background: #F0F0EE; color: var(--ink-2); border: 1px solid var(--line-2); }
+
+    .perks { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+    .perks li {
+      display: flex; align-items: center; gap: 11px;
+      font-size: 14px; font-weight: 600; color: var(--ink-2);
+    }
+    .perk-dot {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      display: grid; place-items: center;
+    }
+    .option-card.employee .perk-dot { background: var(--red-tint); color: var(--red); }
+    .option-card.employer .perk-dot { background: #F0F0EE; color: var(--ink); }
+
+    .btn-role {
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      padding: 15px; border-radius: 13px;
+      font-family: inherit; font-size: 15.5px; font-weight: 800; letter-spacing: -.2px;
+      border: none; cursor: pointer; width: 100%; text-decoration: none;
+      margin-top: auto;
+      transition: background .15s, transform .08s, box-shadow .15s;
+    }
+    .btn-role:active { transform: scale(.98); }
+    .option-card.employee .btn-role {
+      background: var(--red); color: #fff;
+      box-shadow: 0 8px 22px rgba(235,23,0,.30);
+    }
+    .option-card.employee .btn-role:hover { background: var(--red-600); }
+    .option-card.employer .btn-role {
+      background: var(--ink); color: #fff;
+      box-shadow: 0 8px 22px rgba(0,0,0,.18);
+    }
+    .option-card.employer .btn-role:hover { background: #2d2d2d; }
+    .btn-arrow {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: rgba(255,255,255,.2); display: grid; place-items: center;
+    }
+
+    /* Footer */
+    .footer-link {
+      text-align: center; margin-top: 32px;
+      font-size: 14px; color: rgba(255,255,255,.75); font-weight: 500;
+    }
+    .footer-link a { color: #fff; font-weight: 700; text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .cards { grid-template-columns: 1fr; }
+      .hero h1 { letter-spacing: -1px; }
+      .top-nav { margin-bottom: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating background cards -->
+<div class="bg-float">
+  <div class="bg-jc jf-1">
+    <div class="r1"><span class="bdg">Factory</span><span class="wage">LKR 2,200</span></div>
+    <h5>Garment Factory Worker</h5>
+    <div class="meta">08:00–17:00 · Katunayake</div>
+  </div>
+  <div class="bg-jc jf-2">
+    <div class="r1"><span class="bdg">Restaurant</span><span class="wage">LKR 1,200</span></div>
+    <h5>Restaurant Waiter</h5>
+    <div class="meta">11:00–23:00 · Kandy City</div>
+  </div>
+  <div class="bg-jc jf-3">
+    <div class="r1"><span class="bdg">Marketing</span><span class="wage">LKR 2,500</span></div>
+    <h5>Brand Promoter</h5>
+    <div class="meta">09:00–17:00 · Colombo</div>
+  </div>
+  <div class="bg-jc jf-4">
+    <div class="r1"><span class="bdg">Retail</span><span class="wage">LKR 1,800</span></div>
+    <h5>Warehouse Packer</h5>
+    <div class="meta">07:00–16:00 · Kelaniya</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Nav -->
+  <nav class="top-nav">
+    <a href="/index.html" class="brand">
+      <div class="brand-mark">FW</div>
+      <div class="brand-name">FlexiWork</div>
+    </a>
+    <a href="/login.html" class="nav-login">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Sign in
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Sri Lanka's Daily Job Platform
+    </div>
+    <h1>How would you like<br>to use <em>FlexiWork?</em></h1>
+    <p>Join thousands of workers and companies already using FlexiWork to fill daily shifts across Sri Lanka.</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards-wrap">
+    <div class="cards">
+
+      <!-- WORKER CARD -->
+      <a href="/register.html" class="option-card employee">
+        <div class="card-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="card-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <h2>I'm looking<br>for work</h2>
+        <p class="sub">Browse daily job listings, apply in seconds, and start earning. Get paid same-day for every shift.</p>
+        <div class="stat-chips">
+          <span class="stat-chip">500+ Active Jobs</span>
+          <span class="stat-chip">Daily Pay</span>
+          <span class="stat-chip">Instant Apply</span>
+        </div>
+        <ul class="perks">
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+            Browse jobs near you
+          </li>
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></div>
+            Choose your own schedule
+          </li>
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            Get paid every day
+          </li>
+        </ul>
+        <span class="btn-role">
+          Register as Worker
+          <span class="btn-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </span>
+      </a>
+
+      <!-- COMPANY CARD -->
+      <a href="/register-company.html" class="option-card employer">
+        <div class="card-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+          <div class="card-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <h2>I'm hiring<br>workers</h2>
+        <p class="sub">Post shift openings, find verified workers instantly, and manage your workforce all in one place.</p>
+        <div class="stat-chips">
+          <span class="stat-chip">10K+ Workers</span>
+          <span class="stat-chip">Post in Minutes</span>
+          <span class="stat-chip">RoC Verified</span>
+        </div>
+        <ul class="perks">
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.2"/><path d="M22 21v-2a4 4 0 0 0-3-3.8"/><path d="M16 3.2A4 4 0 0 1 16 11"/></svg></div>
+            Access 10,000+ verified workers
+          </li>
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            Background-checked staff
+          </li>
+          <li>
+            <div class="perk-dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+            Manage shifts &amp; rosters easily
+          </li>
+        </ul>
+        <span class="btn-role">
+          Register as Company
+          <span class="btn-arrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </span>
+      </a>
+
+    </div>
+  </div>
+
+  <p class="footer-link">Already have an account? <a href="/login.html">Sign in here</a></p>
+
+</div>
+
+</body>
+</html>
