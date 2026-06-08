@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Worker Verification — FlexiWork</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#EB1700' } } } }</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    @keyframes pulse-green { 0%,100%{ box-shadow:0 0 0 0 rgba(16,185,129,.4) } 70%{ box-shadow:0 0 0 20px rgba(16,185,129,0) } }
+    @keyframes pulse-red   { 0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,.4)  } 70%{ box-shadow:0 0 0 20px rgba(239,68,68,0)  } }
+    .pulse-green { animation: pulse-green 1.8s infinite; }
+    .pulse-red   { animation: pulse-red   1.8s infinite; }
+    @keyframes spin { to{ transform:rotate(360deg) } }
+    .spin { animation:spin .8s linear infinite; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+
+  <!-- Logo bar -->
+  <div class="flex items-center gap-2 mb-8">
+    <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+      <span class="text-white font-black text-sm">FW</span>
+    </div>
+    <span class="font-black text-xl text-gray-900">FlexiWork</span>
+  </div>
+
+  <!-- Card -->
+  <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl overflow-hidden">
+
+    <!-- Loading state -->
+    <div id="state-loading" class="px-8 py-12 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-gray-200 border-t-primary spin"></div>
+      <p class="text-gray-500 font-medium">Verifying worker...</p>
+    </div>
+
+    <!-- APPROVED state -->
+    <div id="state-approved" class="hidden">
+      <div class="bg-green-500 px-8 py-10 text-center">
+        <div class="w-24 h-24 mx-auto mb-4 bg-white rounded-full flex items-center justify-center pulse-green">
+          <svg width="52" height="52" fill="none" viewBox="0 0 24 24">
+            <path d="M5 13l4 4L19 7" stroke="#10B981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="text-white text-3xl font-black">APPROVED</h1>
+        <p class="text-green-100 text-sm mt-1">Worker is verified and active</p>
+      </div>
+      <div class="px-8 py-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Name</span>
+          <span id="a-name" class="text-sm font-bold text-gray-900">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">NIC</span>
+          <span id="a-nic" class="text-sm font-medium text-gray-700">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Phone</span>
+          <span id="a-phone" class="text-sm font-medium text-gray-700">—</span>
+        </div>
+        <div class="h-px bg-gray-100"></div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Job</span>
+          <span id="a-job" class="text-sm font-bold text-gray-900 text-right max-w-[60%]">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Location</span>
+          <span id="a-location" class="text-sm font-medium text-gray-700">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Shift Date</span>
+          <span id="a-date" class="text-sm font-medium text-gray-700">—</span>
+        </div>
+        <div id="a-checkin-row" class="flex items-center justify-between hidden">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Checked In</span>
+          <span id="a-checkin" class="text-sm font-medium text-green-600">—</span>
+        </div>
+        <div id="a-checkout-row" class="flex items-center justify-between hidden">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Checked Out</span>
+          <span id="a-checkout" class="text-sm font-medium text-gray-600">—</span>
+        </div>
+      </div>
+
+      <!-- Attendance button -->
+      <div id="a-btn-area" class="px-6 pb-6">
+        <button id="a-btn" onclick="recordAttendance()"
+          class="w-full py-3.5 rounded-2xl font-bold text-white text-sm transition-all bg-green-500 hover:bg-green-600 active:scale-95">
+          ✅ Mark Check-In
+        </button>
+        <p id="a-btn-msg" class="text-xs text-center text-gray-400 mt-2 hidden"></p>
+      </div>
+    </div>
+
+    <!-- REJECTED state -->
+    <div id="state-rejected" class="hidden">
+      <div class="bg-red-500 px-8 py-10 text-center">
+        <div class="w-24 h-24 mx-auto mb-4 bg-white rounded-full flex items-center justify-center pulse-red">
+          <svg width="52" height="52" fill="none" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 class="text-white text-3xl font-black">REJECTED</h1>
+        <p id="r-message" class="text-red-100 text-sm mt-1">Worker account is inactive</p>
+      </div>
+      <div class="px-8 py-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Name</span>
+          <span id="r-name" class="text-sm font-bold text-gray-900">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">NIC</span>
+          <span id="r-nic" class="text-sm font-medium text-gray-700">—</span>
+        </div>
+        <div class="h-px bg-gray-100"></div>
+        <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+          <p class="text-red-600 text-xs font-semibold text-center">This worker is NOT authorized to work. Contact admin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPIRED state -->
+    <div id="state-expired" class="hidden">
+      <div class="bg-yellow-500 px-8 py-10 text-center">
+        <div class="w-24 h-24 mx-auto mb-4 bg-white rounded-full flex items-center justify-center">
+          <svg width="52" height="52" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke="#F59E0B" stroke-width="3"/>
+            <path d="M12 7v5l3 3" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 class="text-white text-3xl font-black">EXPIRED</h1>
+        <p class="text-yellow-100 text-sm mt-1">QR code is not valid today</p>
+      </div>
+      <div class="px-8 py-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Worker</span>
+          <span id="e-name" class="text-sm font-bold text-gray-900">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400 uppercase tracking-wide font-semibold">Valid On</span>
+          <span id="e-date" class="text-sm font-medium text-yellow-600">—</span>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3">
+          <p class="text-yellow-700 text-xs font-semibold text-center">This QR is only valid on the assigned shift date.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOT FOUND state -->
+    <div id="state-notfound" class="hidden px-8 py-12 text-center">
+      <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+        <svg width="40" height="40" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-black text-gray-800 mb-2">QR Code Invalid</h2>
+      <p class="text-sm text-gray-500">This QR code was not found or has expired. Please ask the worker to show a fresh QR.</p>
+    </div>
+
+  </div>
+
+  <p class="mt-6 text-xs text-gray-400">Scan time: <span id="scan-time"></span></p>
+
+  <script>
+    document.getElementById('scan-time').textContent = new Date().toLocaleString();
+
+    const token = new URLSearchParams(window.location.search).get('token');
+
+    if (!token) {
+      show('notfound');
+    } else {
+      fetch('/api/qr/verify/' + token)
+        .then(r => r.json())
+        .then(json => {
+          const d = json.data;
+          if (!d || d.status === 'NOT_FOUND') { show('notfound'); return; }
+          if (d.status === 'EXPIRED') {
+            document.getElementById('e-name').textContent = d.workerName || '—';
+            document.getElementById('e-date').textContent = d.shiftDate || '—';
+            show('expired'); return;
+          }
+
+          if (d.status === 'APPROVED') {
+            document.getElementById('a-name').textContent     = d.workerName || '—';
+            document.getElementById('a-nic').textContent      = d.nic        || '—';
+            document.getElementById('a-phone').textContent    = d.phone      || '—';
+            document.getElementById('a-job').textContent      = d.jobTitle   || '—';
+            document.getElementById('a-location').textContent = d.jobLocation || '—';
+            document.getElementById('a-date').textContent     = d.shiftDate  || '—';
+            if (d.checkInTime) {
+              document.getElementById('a-checkin').textContent = fmtTime(d.checkInTime);
+              document.getElementById('a-checkin-row').classList.remove('hidden');
+            }
+            if (d.checkOutTime) {
+              document.getElementById('a-checkout').textContent = fmtTime(d.checkOutTime);
+              document.getElementById('a-checkout-row').classList.remove('hidden');
+              // Already checked out — hide button
+              document.getElementById('a-btn-area').classList.add('hidden');
+            } else if (d.checkInTime) {
+              // Already checked in — show check-out button
+              document.getElementById('a-btn').textContent = '🏁 Mark Check-Out';
+              document.getElementById('a-btn').className = 'w-full py-3.5 rounded-2xl font-bold text-white text-sm transition-all bg-orange-500 hover:bg-orange-600 active:scale-95';
+            }
+            show('approved');
+          } else {
+            document.getElementById('r-name').textContent    = d.workerName || '—';
+            document.getElementById('r-nic').textContent     = d.nic        || '—';
+            document.getElementById('r-message').textContent = d.message    || 'Worker account is inactive';
+            show('rejected');
+          }
+        })
+        .catch(() => show('notfound'));
+    }
+
+    function show(state) {
+      ['loading','approved','rejected','notfound','expired'].forEach(s =>
+        document.getElementById('state-' + s).classList.add('hidden'));
+      document.getElementById('state-' + state).classList.remove('hidden');
+    }
+
+    function fmtTime(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString();
+    }
+
+    async function recordAttendance() {
+      const btn = document.getElementById('a-btn');
+      const msg = document.getElementById('a-btn-msg');
+      btn.disabled = true;
+      btn.textContent = '⏳ Recording...';
+
+      try {
+        const res = await fetch('/api/qr/attendance/' + token, { method: 'POST' });
+        const json = await res.json();
+        const action = json.data?.action;
+
+        if (action === 'CHECK_IN') {
+          btn.textContent = '✅ Checked In!';
+          btn.className = 'w-full py-3.5 rounded-2xl font-bold text-white text-sm bg-gray-400 cursor-not-allowed';
+          msg.textContent = 'Check-in recorded. WhatsApp message sent to worker.';
+          msg.classList.remove('hidden');
+          document.getElementById('a-checkin').textContent = fmtTime(json.data.checkInTime);
+          document.getElementById('a-checkin-row').classList.remove('hidden');
+        } else if (action === 'CHECK_OUT') {
+          btn.textContent = '🏁 Checked Out!';
+          btn.className = 'w-full py-3.5 rounded-2xl font-bold text-white text-sm bg-gray-400 cursor-not-allowed';
+          msg.textContent = 'Check-out recorded. WhatsApp message sent to worker.';
+          msg.classList.remove('hidden');
+          document.getElementById('a-checkout').textContent = fmtTime(json.data.checkOutTime);
+          document.getElementById('a-checkout-row').classList.remove('hidden');
+        } else if (action === 'ALREADY_COMPLETED') {
+          btn.textContent = '✔ Already Completed';
+          btn.className = 'w-full py-3.5 rounded-2xl font-bold text-white text-sm bg-gray-400 cursor-not-allowed';
+          msg.textContent = 'This worker has already checked in and out.';
+          msg.classList.remove('hidden');
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = '⚠ Try Again';
+        msg.textContent = 'Failed to record. Please try again.';
+        msg.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

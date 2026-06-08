@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Log — FlexiWork Admin</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; }
+  .header { background: #1e293b; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { font-size: 18px; }
+  .back-btn { background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+  .filter-bar { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .filter-bar select, .filter-bar input { padding: 9px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; }
+  .filter-bar select:focus, .filter-bar input:focus { border-color: #3b82f6; }
+  .filter-bar button { padding: 9px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .filter-bar button.reset { background: #64748b; }
+  .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat { background: white; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 140px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat .val { font-size: 28px; font-weight: 700; color: #1e293b; }
+  .stat .lbl { font-size: 12px; color: #64748b; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  th { background: #1e293b; color: white; padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  tr:hover td { background: #f8fafc; }
+  .action-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-login    { background: #dbeafe; color: #1d4ed8; }
+  .badge-logout   { background: #f1f5f9; color: #475569; }
+  .badge-job      { background: #dcfce7; color: #166534; }
+  .badge-app      { background: #fef9c3; color: #854d0e; }
+  .badge-payment  { background: #f0fdf4; color: #15803d; }
+  .badge-doc      { background: #ede9fe; color: #6d28d9; }
+  .badge-security { background: #fff7ed; color: #9a3412; }
+  .badge-default  { background: #f1f5f9; color: #475569; }
+  .role-worker   { color: #2563eb; }
+  .role-employer { color: #d97706; }
+  .role-admin    { color: #dc2626; }
+  .role-security { color: #7c3aed; }
+  .pagination { display: flex; gap: 8px; margin-top: 16px; justify-content: center; }
+  .pagination button { padding: 7px 14px; border: 2px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  .pagination button.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+  .pagination button:disabled { opacity: 0.4; cursor: default; }
+  .empty { text-align: center; padding: 40px; color: #94a3b8; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 Audit Log</h1>
+  <button class="back-btn" onclick="window.location.href='/admin.html'">← Back to Dashboard</button>
+</div>
+
+<div class="container">
+  <!-- Filters -->
+  <div class="filter-bar">
+    <select id="filterAction">
+      <option value="">All Actions</option>
+      <option>LOGIN</option><option>LOGOUT</option>
+      <option>JOB_CREATED</option><option>JOB_DELETED</option><option>JOB_UPDATED</option>
+      <option>APP_APPROVED</option><option>APP_CANCELLED</option>
+      <option>PAYMENT_MADE</option>
+      <option>DOC_SUBMITTED</option><option>DOC_APPROVED</option><option>DOC_REJECTED</option>
+      <option>GUARD_CREATED</option><option>GUARD_DEACTIVATED</option>
+      <option>SHIFT_EXTENDED</option>
+    </select>
+    <select id="filterRole">
+      <option value="">All Roles</option>
+      <option>WORKER</option><option>EMPLOYER</option><option>ADMIN</option><option>SECURITY</option>
+    </select>
+    <input type="date" id="filterFrom" placeholder="From date">
+    <input type="date" id="filterTo"   placeholder="To date">
+    <input type="number" id="filterUser" placeholder="User ID" style="width:110px">
+    <button onclick="loadLogs(0)">🔍 Search</button>
+    <button class="reset" onclick="resetFilters()">Reset</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="val" id="statTotal">—</div><div class="lbl">Total Events</div></div>
+    <div class="stat"><div class="val" id="statLogins">—</div><div class="lbl">Logins Today</div></div>
+    <div class="stat"><div class="val" id="statPayments">—</div><div class="lbl">Payments</div></div>
+    <div class="stat"><div class="val" id="statDocs">—</div><div class="lbl">Doc Submissions</div></div>
+  </div>
+
+  <!-- Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Timestamp</th>
+        <th>Action</th>
+        <th>User ID</th>
+        <th>Role</th>
+        <th>Entity</th>
+        <th>Details</th>
+        <th>IP</th>
+      </tr>
+    </thead>
+    <tbody id="logsBody">
+      <tr><td colspan="8" class="empty">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+let currentPage = 0;
+let totalPages  = 0;
+
+async function getCsrf() {
+  const m = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+async function checkAuth() {
+  const res = await fetch('/api/auth/me', { credentials: 'include' });
+  if (!res.ok) { window.location.href = '/login.html'; return; }
+  const data = await res.json();
+  if (data.data?.role !== 'ADMIN') { window.location.href = '/login.html'; }
+}
+
+async function loadLogs(page = 0) {
+  currentPage = page;
+  const action   = document.getElementById('filterAction').value;
+  const userType = document.getElementById('filterRole').value;
+  const from     = document.getElementById('filterFrom').value;
+  const to       = document.getElementById('filterTo').value;
+  const userId   = document.getElementById('filterUser').value;
+
+  const params = new URLSearchParams({ page, size: 50 });
+  if (action)   params.set('action', action);
+  if (userType) params.set('userType', userType);
+  if (from)     params.set('from', from);
+  if (to)       params.set('to', to);
+  if (userId)   params.set('userId', userId);
+
+  try {
+    const res  = await fetch('/api/admin/audit-logs?' + params, { credentials: 'include' });
+    const data = await res.json();
+    renderLogs(data.data);
+  } catch (e) {
+    document.getElementById('logsBody').innerHTML = `<tr><td colspan="8" class="empty">Error loading logs</td></tr>`;
+  }
+}
+
+function renderLogs(pageData) {
+  if (!pageData) return;
+  totalPages = pageData.totalPages;
+  const tbody = document.getElementById('logsBody');
+  document.getElementById('statTotal').textContent = pageData.totalElements;
+
+  if (!pageData.content || pageData.content.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty">No audit logs found for the selected filters</td></tr>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = pageData.content.map((log, i) => `
+    <tr>
+      <td style="color:#94a3b8;">${log.logId}</td>
+      <td style="white-space:nowrap;">${formatTime(log.createdAt)}</td>
+      <td>${actionBadge(log.action)}</td>
+      <td>${log.userId ?? '—'}</td>
+      <td class="role-${(log.userType||'').toLowerCase()}">${log.userType || '—'}</td>
+      <td style="color:#64748b;">${log.entityType ? log.entityType + ' #' + (log.entityId||'') : '—'}</td>
+      <td style="max-width:260px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(log.details||'')}">${esc(log.details||'—')}</td>
+      <td style="font-family:monospace; color:#94a3b8; font-size:11px;">${log.ipAddress||'—'}</td>
+    </tr>`).join('');
+
+  renderPagination();
+}
+
+function actionBadge(action) {
+  if (!action) return '—';
+  const cls = action.startsWith('LOGIN')    ? 'badge-login'
+            : action.startsWith('LOGOUT')   ? 'badge-logout'
+            : action.startsWith('JOB')      ? 'badge-job'
+            : action.startsWith('APP')      ? 'badge-app'
+            : action.startsWith('PAYMENT')  ? 'badge-payment'
+            : action.startsWith('DOC')      ? 'badge-doc'
+            : action.startsWith('GUARD') || action.startsWith('SHIFT') ? 'badge-security'
+            : 'badge-default';
+  return `<span class="action-badge ${cls}">${action}</span>`;
+}
+
+function renderPagination() {
+  const p = document.getElementById('pagination');
+  if (totalPages <= 1) { p.innerHTML = ''; return; }
+  let html = `<button onclick="loadLogs(${currentPage-1})" ${currentPage===0?'disabled':''}>← Prev</button>`;
+  for (let i = 0; i < totalPages; i++) {
+    if (i < 3 || i > totalPages-3 || Math.abs(i-currentPage) < 2) {
+      html += `<button onclick="loadLogs(${i})" class="${i===currentPage?'active':''}">${i+1}</button>`;
+    } else if (Math.abs(i-currentPage) === 2) html += '<span>…</span>';
+  }
+  html += `<button onclick="loadLogs(${currentPage+1})" ${currentPage===totalPages-1?'disabled':''}>Next →</button>`;
+  p.innerHTML = html;
+}
+
+function formatTime(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleString('en-LK', { timeZone: 'Asia/Colombo', dateStyle: 'short', timeStyle: 'short' });
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function resetFilters() {
+  ['filterAction','filterRole','filterFrom','filterTo','filterUser'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  loadLogs(0);
+}
+
+// Load stats
+async function loadStats() {
+  const today = new Date().toISOString().split('T')[0];
+  const [logins, payments, docs] = await Promise.all([
+    fetch(`/api/admin/audit-logs?action=LOGIN&from=${today}&size=1`, { credentials: 'include' }).then(r=>r.json()),
+    fetch(`/api/admin/audit-logs?action=PAYMENT_MADE&size=1`, { credentials: 'include' }).then(r=>r.json()),
+    fetch(`/api/admin/audit-logs?action=DOC_SUBMITTED&size=1`, { credentials: 'include' }).then(r=>r.json()),
+  ]);
+  document.getElementById('statLogins').textContent   = logins.data?.totalElements ?? '—';
+  document.getElementById('statPayments').textContent = payments.data?.totalElements ?? '—';
+  document.getElementById('statDocs').textContent     = docs.data?.totalElements ?? '—';
+}
+
+checkAuth().then(() => { loadLogs(0); loadStats(); });
+</script>
+</body>
+</html>

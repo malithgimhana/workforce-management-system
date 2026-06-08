@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employer Dashboard — FlexiWork</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#EB1700' } } } }</script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<nav class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <a href="/index.html" class="flex items-center gap-2">
+      <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+        <span class="text-white font-black text-sm">FW</span>
+      </div>
+      <span class="font-black text-xl text-gray-900">FlexiWork</span>
+    </a>
+    <div id="auth-area" class="flex items-center gap-2 shrink-0"></div>
+  </div>
+</nav>
+
+<!-- Header -->
+<div class="bg-primary text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-black" id="company-name">Employer Dashboard</h1>
+        <p class="text-red-200 text-sm mt-0.5">Manage your job postings and workers</p>
+      </div>
+      <button onclick="openPostModal()"
+        class="bg-white text-primary font-bold px-5 py-2.5 rounded-xl hover:bg-red-50 transition text-sm flex items-center gap-2 w-fit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+        </svg>
+        Post New Job
+      </button>
+    </div>
+    <div class="grid grid-cols-3 gap-4 mt-6">
+      <div class="bg-white/10 rounded-2xl px-4 py-3 text-center">
+        <div id="stat-jobs" class="text-2xl font-black">—</div>
+        <div class="text-red-200 text-xs mt-0.5">Total Jobs</div>
+      </div>
+      <div class="bg-white/10 rounded-2xl px-4 py-3 text-center">
+        <div id="stat-active" class="text-2xl font-black">—</div>
+        <div class="text-red-200 text-xs mt-0.5">Active</div>
+      </div>
+      <div class="bg-white/10 rounded-2xl px-4 py-3 text-center">
+        <div id="stat-workers" class="text-2xl font-black">—</div>
+        <div class="text-red-200 text-xs mt-0.5">Workers Hired</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Scanner section -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+    <h2 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+      <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+      </svg>
+      Worker Check-In Scanner
+    </h2>
+    <div class="flex gap-3">
+      <input id="qr-token-input" type="text" placeholder="Paste QR token here to mark check-in/out"
+        class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+      <button onclick="scanQR()" class="bg-primary hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition">Scan</button>
+    </div>
+    <div id="scan-result" class="hidden mt-3 rounded-xl p-4 text-sm font-medium"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 bg-white rounded-2xl p-1 shadow-sm border border-gray-100 mb-6 overflow-x-auto w-fit">
+    <button onclick="showTab('jobs')"     id="tab-jobs"     class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition bg-primary text-white whitespace-nowrap">My Jobs</button>
+    <button onclick="showTab('payments')" id="tab-payments" class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition text-gray-500 hover:text-gray-700 whitespace-nowrap">💳 Payments</button>
+    <button onclick="showTab('staff')"    id="tab-staff"    class="tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition text-gray-500 hover:text-gray-700 whitespace-nowrap">👥 Staff</button>
+  </div>
+
+  <!-- Jobs Panel -->
+  <div id="panel-jobs">
+
+  <!-- Export Buttons -->
+  <div class="flex gap-3 mb-6">
+    <a href="/api/reports/export/csv?type=attendance" class="text-sm bg-white border border-gray-200 hover:border-primary hover:text-primary text-gray-600 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1.5">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Export Attendance CSV
+    </a>
+    <a href="/api/reports/export/pdf?type=attendance" class="text-sm bg-white border border-gray-200 hover:border-primary hover:text-primary text-gray-600 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1.5">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+      Export PDF
+    </a>
+  </div>
+
+  <!-- Jobs list -->
+  <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+    <span class="w-2 h-5 bg-primary rounded-full inline-block"></span>
+    My Job Postings
+  </h2>
+  <div id="jobs-list" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="col-span-full flex justify-center py-12">
+      <div class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+    </div>
+  </div>
+
+  </div><!-- end panel-jobs -->
+
+  <!-- Payments Panel -->
+  <div id="panel-payments" class="hidden max-w-3xl">
+
+    <!-- Generate Receipt -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+      <h2 class="font-bold text-gray-900 mb-4 flex items-center gap-2 text-lg">
+        💳 Weekly Commission Payment
+      </h2>
+      <p class="text-sm text-gray-500 mb-4">FlexiWork charges <strong>10% commission</strong> on total worker wages per week (Monday–Sunday). Generate a receipt and pay securely.</p>
+      <div class="flex gap-3">
+        <input type="date" id="pay-week-date" class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+        <button onclick="generateReceipt()" class="bg-primary hover:bg-red-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition whitespace-nowrap">Generate Receipt</button>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">Select any date within the week you want to pay for.</p>
+    </div>
+
+    <!-- Receipt Display -->
+    <div id="receipt-card" class="hidden bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
+      <div class="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <div class="font-bold text-lg">FlexiWork Invoice</div>
+          <div id="receipt-week" class="text-gray-400 text-sm mt-0.5"></div>
+        </div>
+        <div id="receipt-status-badge" class="px-3 py-1 rounded-full text-xs font-bold"></div>
+      </div>
+      <div class="p-6">
+        <!-- Line items -->
+        <div class="mb-4">
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Workers This Week</div>
+          <div id="receipt-items" class="space-y-2 max-h-48 overflow-y-auto"></div>
+        </div>
+        <!-- Totals -->
+        <div class="border-t border-gray-100 pt-4 space-y-2">
+          <div class="flex justify-between text-sm text-gray-500">
+            <span>Total Worker Wages</span>
+            <span id="receipt-wages" class="font-semibold text-gray-900"></span>
+          </div>
+          <div class="flex justify-between text-sm text-gray-500">
+            <span>Commission Rate</span>
+            <span class="font-semibold text-gray-900">10%</span>
+          </div>
+          <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-100 pt-2 mt-2">
+            <span>Total Due</span>
+            <span id="receipt-total" class="text-primary text-lg"></span>
+          </div>
+        </div>
+
+        <!-- Pay button or Already paid -->
+        <div id="pay-section" class="mt-6"></div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="font-bold text-gray-900">Payment History</h3>
+        <button onclick="loadPaymentHistory()" class="text-xs text-primary font-semibold hover:underline">Refresh</button>
+      </div>
+      <div id="payment-history" class="p-4">
+        <div class="text-center py-8 text-gray-400 text-sm">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div id="pay-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+    <div class="bg-white rounded-3xl p-7 max-w-md w-full shadow-2xl">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-black text-gray-900">💳 Pay Commission</h2>
+        <button onclick="closePayModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="bg-gray-50 rounded-xl p-4 mb-5 text-center">
+        <div class="text-sm text-gray-500">Amount Due</div>
+        <div id="modal-amount" class="text-3xl font-black text-primary mt-1"></div>
+        <div id="modal-week" class="text-xs text-gray-400 mt-1"></div>
+      </div>
+
+      <div id="pay-modal-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4"></div>
+
+      <div class="space-y-4">
+        <!-- Card number -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Card Number</label>
+          <input id="card-number" type="text" maxlength="19" placeholder="1234 5678 9012 3456"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary tracking-widest"
+            oninput="formatCardNumber(this)"/>
+        </div>
+        <!-- Expiry + CVV -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Expiry (MM/YY)</label>
+            <input id="card-expiry" type="text" maxlength="5" placeholder="12/28"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+              oninput="formatExpiry(this)"/>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">CVV</label>
+            <input id="card-cvv" type="password" maxlength="3" placeholder="•••"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"/>
+          </div>
+        </div>
+        <!-- Card holder -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Card Holder Name</label>
+          <input id="card-holder" type="text" placeholder="As on card"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-700">
+          🔒 <strong>Test Mode:</strong> Use any 16-digit number, valid MM/YY expiry, and 3-digit CVV. This is a prototype payment gateway.
+        </div>
+
+        <button id="pay-btn" onclick="submitPayment()"
+          class="w-full bg-primary hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          Pay Now
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Post Job Modal -->
+<div id="post-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4 py-6">
+  <div class="bg-white rounded-3xl p-7 max-w-lg w-full shadow-2xl max-h-screen overflow-y-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-black text-gray-900" id="modal-title">Post New Job</h2>
+      <button onclick="closePostModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div id="modal-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-4"></div>
+
+    <form id="post-form" class="space-y-4">
+      <input type="hidden" id="edit-job-id"/>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Job Title <span class="text-red-500">*</span></label>
+        <input id="f-title" type="text" placeholder="e.g. Garment Factory Worker"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+        <textarea id="f-desc" rows="2" placeholder="Briefly describe the role"
+          class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Category <span class="text-red-500">*</span></label>
+          <select id="f-category" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required>
+            <option value="">Select</option>
+            <option value="FACTORY">Factory</option>
+            <option value="RESTAURANT">Restaurant</option>
+            <option value="MARKETING">Marketing</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">District <span class="text-red-500">*</span></label>
+          <select id="f-district" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required>
+            <option value="">Select</option>
+            <option>Colombo</option><option>Gampaha</option><option>Kalutara</option>
+            <option>Kandy</option><option>Matale</option><option>Nuwara Eliya</option>
+            <option>Galle</option><option>Matara</option><option>Hambantota</option>
+            <option>Jaffna</option><option>Kilinochchi</option><option>Mannar</option>
+            <option>Mullaitivu</option><option>Vavuniya</option><option>Trincomalee</option>
+            <option>Batticaloa</option><option>Ampara</option><option>Kegalle</option>
+            <option>Ratnapura</option><option>Anuradhapura</option><option>Polonnaruwa</option>
+            <option>Badulla</option><option>Monaragala</option><option>Kurunegala</option>
+            <option>Puttalam</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Location with geocoding -->
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-3">
+        <p class="text-xs font-bold text-blue-800 uppercase tracking-widest">Job Location</p>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Address <span class="text-red-500">*</span></label>
+          <div class="flex gap-2">
+            <input id="f-location" type="text" placeholder="e.g. No. 45, Katunayake Industrial Zone, Katunayake"
+              class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+            <button type="button" id="geocode-btn" onclick="findLocation()"
+              class="px-4 py-2 bg-primary hover:bg-red-700 text-white text-sm font-bold rounded-xl whitespace-nowrap transition">
+              📍 Find on Map
+            </button>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Enter full address then click "Find on Map" to auto-fill coordinates.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Latitude</label>
+            <input id="f-lat" type="number" step="any" placeholder="Auto-filled" readonly
+              class="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Longitude</label>
+            <input id="f-lng" type="number" step="any" placeholder="Auto-filled" readonly
+              class="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-3 text-sm"/>
+          </div>
+        </div>
+        <div id="map-preview" class="hidden bg-green-50 border border-green-200 rounded-xl p-3">
+          <p class="text-xs font-semibold text-green-800 mb-1">Location found:</p>
+          <p id="map-label" class="text-xs text-green-700 mb-2"></p>
+          <a id="map-link" href="#" target="_blank" rel="noopener noreferrer"
+            class="text-xs text-primary font-semibold hover:underline">✓ Verify this pin on Google Maps →</a>
+          <p class="text-xs text-gray-400 mt-1">If the pin is wrong, edit the address and click "Find on Map" again.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Daily Wage (Rs.) <span class="text-red-500">*</span></label>
+          <input id="f-wage" type="number" min="1" placeholder="1500"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Workers Needed <span class="text-red-500">*</span></label>
+          <input id="f-workers" type="number" min="1" placeholder="10"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Shift Date <span class="text-red-500">*</span></label>
+          <input id="f-date" type="date"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Start Time <span class="text-red-500">*</span></label>
+          <input id="f-start" type="time"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">End Time <span class="text-red-500">*</span></label>
+          <input id="f-end" type="time"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required/>
+        </div>
+      </div>
+      <!-- Gender Preference -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Gender Preference</label>
+        <div class="flex gap-2">
+          <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 cursor-pointer hover:border-primary transition">
+            <input type="radio" name="gender" value="ANY" checked class="accent-red-600"/>
+            <span class="text-sm font-medium text-gray-700">👥 Any</span>
+          </label>
+          <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 cursor-pointer hover:border-primary transition">
+            <input type="radio" name="gender" value="MALE" class="accent-red-600"/>
+            <span class="text-sm font-medium text-gray-700">👨 Male Only</span>
+          </label>
+          <label class="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5 cursor-pointer hover:border-primary transition">
+            <input type="radio" name="gender" value="FEMALE" class="accent-red-600"/>
+            <span class="text-sm font-medium text-gray-700">👩 Female Only</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Age Range -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Age Range <span class="text-gray-400 font-normal text-xs">(optional — leave blank for any age)</span></label>
+        <div class="flex gap-3 items-center">
+          <input id="f-minage" type="number" min="18" max="70" placeholder="Min (e.g. 18)"
+            class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+          <span class="text-gray-400 font-bold shrink-0">to</span>
+          <input id="f-maxage" type="number" min="18" max="70" placeholder="Max (e.g. 55)"
+            class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="button" onclick="closePostModal()" class="flex-1 border border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition text-sm">Cancel</button>
+        <button type="submit" id="post-btn" class="flex-1 bg-primary hover:bg-red-700 text-white font-bold py-3 rounded-xl transition text-sm">Post Job</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div id="del-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+  <div class="bg-white rounded-2xl p-7 max-w-sm w-full shadow-2xl text-center">
+    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+    </div>
+    <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Job?</h3>
+    <p class="text-sm text-gray-500 mb-6">This will remove the job listing. Workers who applied will be notified.</p>
+    <div class="flex gap-3">
+      <button onclick="document.getElementById('del-modal').classList.add('hidden')" class="flex-1 border border-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition text-sm">Cancel</button>
+      <button onclick="confirmDelete()" class="flex-1 bg-primary hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition text-sm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     STAFF PANEL
+══════════════════════════════════════════════ -->
+<div id="panel-staff" class="hidden max-w-3xl">
+
+  <!-- IT Admins section -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-bold text-gray-900">🖥️ IT Admins</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Can post jobs and extend shifts. Cannot access payments or documents.</p>
+      </div>
+      <button onclick="openStaffModal('IT_ADMIN')" class="bg-primary hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">+ Add IT Admin</button>
+    </div>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Name</th>
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Email</th>
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Phone</th>
+          <th class="py-2 px-3"></th>
+        </tr>
+      </thead>
+      <tbody id="itAdminsBody">
+        <tr><td colspan="4" class="text-center py-6 text-gray-400">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Security Guards section -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-bold text-gray-900">🛡️ Security Guards</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Can only scan QR codes at your site. Login at /login.html</p>
+      </div>
+      <button onclick="openStaffModal('SECURITY')" class="bg-primary hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">+ Add Guard</button>
+    </div>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Name</th>
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Email</th>
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Phone</th>
+          <th class="text-left py-2 px-3 text-xs font-700 text-gray-400 uppercase tracking-wide">Status</th>
+          <th class="py-2 px-3"></th>
+        </tr>
+      </thead>
+      <tbody id="guardsBody">
+        <tr><td colspan="5" class="text-center py-6 text-gray-400">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="staff-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+    <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4">
+      <h3 class="text-white font-bold text-lg" id="staffModalTitle">Add IT Admin</h3>
+    </div>
+    <div class="p-6 space-y-4">
+      <div id="staffFormError" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm font-semibold rounded-xl px-4 py-3"></div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Full Name *</label>
+        <input id="staff-name" type="text" placeholder="e.g. Nimal Perera" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Email *</label>
+        <input id="staff-email" type="email" placeholder="email@company.lk" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Phone</label>
+        <input id="staff-phone" type="tel" placeholder="07XXXXXXXX" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Password *</label>
+        <input id="staff-password" type="password" placeholder="Min 8 characters" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary"/>
+      </div>
+    </div>
+    <div class="px-6 pb-6 flex gap-3">
+      <button onclick="closeStaffModal()" class="flex-1 border border-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition text-sm">Cancel</button>
+      <button onclick="submitStaff()" id="staffSubmitBtn" class="flex-1 bg-primary hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition text-sm">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+let user = null;
+let jobs = [];
+let deleteJobId = null;
+
+const CATEGORY_LABELS = { FACTORY: 'Factory', RESTAURANT: 'Restaurant', MARKETING: 'Marketing', OTHER: 'Other' };
+const CATEGORY_COLORS = { FACTORY: 'bg-blue-100 text-blue-700', RESTAURANT: 'bg-orange-100 text-orange-700', MARKETING: 'bg-purple-100 text-purple-700', OTHER: 'bg-gray-100 text-gray-700' };
+
+// ── Tab switching ────────────────────────────────────────────────────
+function showTab(tab) {
+  ['jobs','documents','payments','staff'].forEach(t => {
+    document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById('tab-' + t);
+    btn.className = `tab-btn px-5 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${t === tab ? 'bg-primary text-white' : 'text-gray-500 hover:text-gray-700'}`;
+  });
+  if (tab === 'documents') loadDocStatus();
+  if (tab === 'payments')  { loadPaymentHistory(); setDefaultWeekDate(); }
+  if (tab === 'staff')     { loadItAdmins(); loadGuards(); }
+}
+
+function setDefaultWeekDate() {
+  document.getElementById('pay-week-date').value = new Date().toISOString().split('T')[0];
+}
+
+async function init() {
+  user = await getMe();
+  if (!user || user.role !== 'EMPLOYER') { window.location.href = '/login.html'; return; }
+  renderAuthArea(user);
+  document.getElementById('company-name').textContent = user.firstName + ' · Employer Dashboard';
+  await loadJobs();
+}
+
+async function loadJobs() {
+  const res = await apiFetch('/api/jobs/company');
+  if (!res.ok) return;
+  const json = await res.json();
+  jobs = json.data || [];
+
+  document.getElementById('stat-jobs').textContent = jobs.length;
+  document.getElementById('stat-active').textContent = jobs.filter(j => j.isActive).length;
+  document.getElementById('stat-workers').textContent = jobs.reduce((s, j) => s + (j.approvedWorkers || 0), 0);
+
+  renderJobs();
+}
+
+function renderJobs() {
+  const list = document.getElementById('jobs-list');
+  if (jobs.length === 0) {
+    list.innerHTML = `<div class="col-span-full text-center py-14 text-gray-400">
+      <p class="font-medium mb-2">No jobs posted yet</p>
+      <button onclick="openPostModal()" class="text-primary text-sm font-semibold hover:underline">Post your first job →</button>
+    </div>`;
+    return;
+  }
+  list.innerHTML = jobs.map(job => {
+    const catColor = CATEGORY_COLORS[job.category] || CATEGORY_COLORS.OTHER;
+    const catLabel = CATEGORY_LABELS[job.category] || job.category;
+    const slots = (job.requiredWorkers || 0) - (job.approvedWorkers || 0);
+    return `<div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-3">
+      <div class="flex items-start justify-between">
+        <span class="text-xs ${catColor} font-semibold px-2 py-0.5 rounded-full">${catLabel}</span>
+        <span class="text-xs ${job.isActive ? 'text-green-600' : 'text-gray-400'} font-semibold">${job.isActive ? '● Active' : '○ Inactive'}</span>
+      </div>
+      <h3 class="font-bold text-gray-900 leading-tight">${job.title}</h3>
+      <div class="text-sm text-gray-500 space-y-1">
+        <div>${job.district} · ${job.latitude && job.longitude
+          ? `<a href="https://www.google.com/maps?q=${job.latitude},${job.longitude}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${esc(job.factoryLocation||'')}</a>`
+          : `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((job.factoryLocation||'') + ', Sri Lanka')}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${esc(job.factoryLocation||'')}</a>`
+        }</div>
+        <div>${formatDate(job.shiftDate)} · ${formatTime(job.shiftStartTime)}–${formatTime(job.shiftEndTime)}</div>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="font-bold text-gray-900 text-sm">Rs. ${Number(job.dailyWage).toLocaleString()}/day</span>
+        <span class="text-xs text-gray-500">${job.approvedWorkers}/${job.requiredWorkers} hired</span>
+      </div>
+      <div class="progress-bar w-full bg-gray-100 rounded-full h-1.5">
+        <div class="bg-primary h-1.5 rounded-full" style="width:${job.requiredWorkers > 0 ? Math.round(job.approvedWorkers/job.requiredWorkers*100) : 0}%"></div>
+      </div>
+      <div class="flex gap-2 mt-1">
+        <button onclick="openEditModal(${job.jobId})" class="flex-1 border border-gray-200 text-gray-700 hover:border-primary hover:text-primary text-xs font-semibold py-2 rounded-xl transition">Edit</button>
+        <button onclick="promptDelete(${job.jobId})" class="flex-1 border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold py-2 rounded-xl transition">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetMapPreview() {
+  document.getElementById('f-lat').value = '';
+  document.getElementById('f-lng').value = '';
+  document.getElementById('map-preview').classList.add('hidden');
+}
+
+async function findLocation() {
+  const address = document.getElementById('f-location').value.trim();
+  const district = document.getElementById('f-district').value;
+  if (!address) { showToast('Enter an address first', 'error'); return; }
+  const btn = document.getElementById('geocode-btn');
+  btn.textContent = 'Finding...'; btn.disabled = true;
+  try {
+    const query = address + (district ? ', ' + district : '') + ', Sri Lanka';
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query);
+    const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const data = await res.json();
+    if (!data.length) { showToast('Address not found. Try a more specific address.', 'error'); return; }
+    const { lat, lon, display_name } = data[0];
+    document.getElementById('f-lat').value = parseFloat(parseFloat(lat).toFixed(6));
+    document.getElementById('f-lng').value = parseFloat(parseFloat(lon).toFixed(6));
+    document.getElementById('map-label').textContent = display_name;
+    document.getElementById('map-link').href = 'https://www.google.com/maps?q=' + lat + ',' + lon;
+    document.getElementById('map-preview').classList.remove('hidden');
+    showToast('Location found! Verify the pin on Google Maps.', 'success');
+  } catch (e) {
+    showToast('Could not reach map service. Enter coordinates manually.', 'error');
+  } finally {
+    btn.textContent = '📍 Find on Map'; btn.disabled = false;
+  }
+}
+
+function openPostModal() {
+  document.getElementById('modal-title').textContent = 'Post New Job';
+  document.getElementById('post-form').reset();
+  document.getElementById('edit-job-id').value = '';
+  document.getElementById('modal-error').classList.add('hidden');
+  document.getElementById('post-btn').textContent = 'Post Job';
+  document.getElementById('f-date').min = new Date().toISOString().split('T')[0];
+  resetMapPreview();
+  document.getElementById('post-modal').classList.remove('hidden');
+}
+
+function openEditModal(jobId) {
+  const job = jobs.find(j => j.jobId === jobId);
+  if (!job) return;
+  document.getElementById('modal-title').textContent = 'Edit Job';
+  document.getElementById('edit-job-id').value = jobId;
+  document.getElementById('f-title').value = job.title || '';
+  document.getElementById('f-desc').value = job.description || '';
+  document.getElementById('f-category').value = job.category || '';
+  document.getElementById('f-district').value = job.district || '';
+  document.getElementById('f-location').value = job.factoryLocation || '';
+  document.getElementById('f-wage').value = job.dailyWage || '';
+  document.getElementById('f-workers').value = job.requiredWorkers || '';
+  document.getElementById('f-date').value = job.shiftDate || '';
+  document.getElementById('f-start').value = job.shiftStartTime ? job.shiftStartTime.substring(0,5) : '';
+  document.getElementById('f-end').value = job.shiftEndTime ? job.shiftEndTime.substring(0,5) : '';
+  // Restore coordinates
+  resetMapPreview();
+  if (job.latitude && job.longitude) {
+    document.getElementById('f-lat').value = job.latitude;
+    document.getElementById('f-lng').value = job.longitude;
+    document.getElementById('map-label').textContent = job.factoryLocation || '';
+    document.getElementById('map-link').href = 'https://www.google.com/maps?q=' + job.latitude + ',' + job.longitude;
+    document.getElementById('map-preview').classList.remove('hidden');
+  }
+  document.getElementById('post-btn').textContent = 'Save Changes';
+  document.getElementById('modal-error').classList.add('hidden');
+  document.getElementById('post-modal').classList.remove('hidden');
+}
+
+function closePostModal() { document.getElementById('post-modal').classList.add('hidden'); }
+
+document.getElementById('post-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('post-btn');
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Saving...';
+
+  const editId = document.getElementById('edit-job-id').value;
+  const latVal = document.getElementById('f-lat').value;
+  const lngVal = document.getElementById('f-lng').value;
+  const payload = {
+    title: document.getElementById('f-title').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+    category: document.getElementById('f-category').value,
+    district: document.getElementById('f-district').value,
+    factoryLocation: document.getElementById('f-location').value.trim(),
+    latitude:  latVal ? parseFloat(latVal) : null,
+    longitude: lngVal ? parseFloat(lngVal) : null,
+    dailyWage: parseFloat(document.getElementById('f-wage').value),
+    requiredWorkers: parseInt(document.getElementById('f-workers').value),
+    shiftDate: document.getElementById('f-date').value,
+    shiftStartTime: document.getElementById('f-start').value + ':00',
+    shiftEndTime: document.getElementById('f-end').value + ':00',
+    gender: document.querySelector('input[name="gender"]:checked')?.value || 'ANY',
+    minAge: document.getElementById('f-minage').value ? parseInt(document.getElementById('f-minage').value) : null,
+    maxAge: document.getElementById('f-maxage').value ? parseInt(document.getElementById('f-maxage').value) : null
+  };
+
+  const method = editId ? 'PUT' : 'POST';
+  const url = editId ? `/api/jobs/${editId}` : '/api/jobs';
+  const res = await apiFetch(url, { method, body: JSON.stringify(payload) });
+  const json = await res.json();
+
+  btn.disabled = false;
+  btn.textContent = oldText;
+
+  if (res.ok) {
+    showToast(editId ? 'Job updated!' : 'Job posted!', 'success');
+    closePostModal();
+    await loadJobs();
+  } else {
+    const err = document.getElementById('modal-error');
+    err.textContent = json.message || 'Failed to save job';
+    err.classList.remove('hidden');
+  }
+});
+
+function promptDelete(jobId) {
+  deleteJobId = jobId;
+  document.getElementById('del-modal').classList.remove('hidden');
+}
+
+async function confirmDelete() {
+  document.getElementById('del-modal').classList.add('hidden');
+  const res = await apiFetch(`/api/jobs/${deleteJobId}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Job deleted', 'success'); await loadJobs(); }
+  else showToast('Failed to delete', 'error');
+}
+
+async function scanQR() {
+  const token = document.getElementById('qr-token-input').value.trim();
+  if (!token) return;
+  const res = await apiFetch('/api/qr/scan', { method: 'POST', body: JSON.stringify({ qrToken: token }) });
+  const json = await res.json();
+  const box = document.getElementById('scan-result');
+  box.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'border-green-200', 'bg-red-50', 'text-red-700', 'border-red-200');
+  if (res.ok) {
+    box.className = 'mt-3 rounded-xl p-4 text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+    box.textContent = json.data?.message || 'Scanned!';
+  } else {
+    box.className = 'mt-3 rounded-xl p-4 text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+    box.textContent = json.message || 'Invalid QR token';
+  }
+}
+
+// ── CSRF ─────────────────────────────────────────────────────────────
+async function getCsrfToken() {
+  const m = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+// ── Document Upload ───────────────────────────────────────────────────
+async function loadDocStatus() {
+  try {
+    const res  = await apiFetch('/api/documents/company-status');
+    const json = await res.json();
+    const status = json.data?.docStatus || 'NOT_SUBMITTED';
+    const reason = json.data?.docRejectReason || '';
+    const banner = document.getElementById('doc-status-banner');
+    const icon   = document.getElementById('doc-status-icon');
+    const title  = document.getElementById('doc-status-title');
+    const sub    = document.getElementById('doc-status-sub');
+    const btn    = document.getElementById('doc-submit-btn');
+    const configs = {
+      NOT_SUBMITTED: { bg: 'bg-gray-50 border-gray-200',  icon: '📋', t: 'Certificate not submitted',  s: 'Please upload your Business Registration Certificate.' },
+      PENDING:       { bg: 'bg-amber-50 border-amber-200', icon: '⏳', t: 'Under Review',               s: 'Admin is reviewing your certificate. Please wait 24–48 hours.' },
+      APPROVED:      { bg: 'bg-green-50 border-green-200', icon: '✅', t: 'Company Verified',           s: 'Your business is verified. You can post jobs and hire workers.' },
+      REJECTED:      { bg: 'bg-red-50 border-red-200',     icon: '❌', t: 'Certificate Rejected',       s: 'Reason: ' + (reason || 'Please resubmit a clearer image.') },
+    };
+    const c = configs[status] || configs.NOT_SUBMITTED;
+    banner.className = `mb-5 rounded-2xl px-5 py-4 flex items-center gap-4 border ${c.bg}`;
+    icon.textContent  = c.icon;
+    title.textContent = c.t;
+    sub.textContent   = c.s;
+    const disabled = status === 'PENDING' || status === 'APPROVED';
+    btn.disabled = disabled;
+    btn.className = btn.className.replace(/(bg-primary hover:bg-red-700|bg-gray-300 cursor-not-allowed)/, disabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary hover:bg-red-700');
+  } catch(e) { console.error(e); }
+}
+
+function previewBR(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('br-img').src = e.target.result;
+    document.getElementById('br-preview').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitBR() {
+  const file = document.getElementById('br-input').files[0];
+  if (!file) { showDocToast('Please select your BR certificate image.', 'error'); return; }
+  const btn = document.getElementById('doc-submit-btn');
+  btn.textContent = 'Uploading...'; btn.disabled = true;
+  const formData = new FormData();
+  formData.append('brCert', file);
+  try {
+    const token = localStorage.getItem('fw_token');
+    const res  = await fetch('/api/documents/company/upload', {
+      method: 'POST', credentials: 'include',
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+      body: formData
+    });
+    const json = await res.json();
+    if (res.ok) { showDocToast('✅ Certificate submitted! Admin will review shortly.', 'success'); await loadDocStatus(); }
+    else showDocToast(json.message || 'Upload failed.', 'error');
+  } catch(e) { showDocToast('Network error: ' + e.message, 'error'); }
+  finally { btn.textContent = 'Submit for Verification'; btn.disabled = false; }
+}
+
+function showDocToast(msg, type) {
+  const el = document.getElementById('doc-upload-toast');
+  el.textContent = msg;
+  el.className = `mx-6 mt-4 px-4 py-3 rounded-xl text-sm font-semibold ${type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-600 border border-red-200'}`;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+// ── Payments ──────────────────────────────────────────────────────────
+let currentReceiptId = null;
+
+async function generateReceipt() {
+  const weekDate = document.getElementById('pay-week-date').value;
+  if (!weekDate) { showToast('Please select a date', 'error'); return; }
+  try {
+    const res  = await apiFetch(`/api/payments/receipt?weekDate=${weekDate}`);
+    const json = await res.json();
+    if (res.ok) renderReceipt(json.data);
+    else showToast(json.message || 'Failed to generate receipt', 'error');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function renderReceipt(r) {
+  if (!r) return;
+  currentReceiptId = r.receiptId;
+  document.getElementById('receipt-card').classList.remove('hidden');
+  document.getElementById('receipt-week').textContent = `Week: ${r.weekStart} → ${r.weekEnd}`;
+
+  const isPaid = r.paymentStatus === 'PAID';
+  const badge  = document.getElementById('receipt-status-badge');
+  badge.textContent = isPaid ? '✅ PAID' : '⏳ PENDING';
+  badge.className   = `px-3 py-1 rounded-full text-xs font-bold ${isPaid ? 'bg-green-500 text-white' : 'bg-amber-400 text-white'}`;
+
+  document.getElementById('receipt-wages').textContent = `Rs. ${Number(r.totalWorkerWages).toLocaleString()}`;
+  document.getElementById('receipt-total').textContent = `Rs. ${Number(r.totalCommission).toLocaleString()}`;
+
+  // Line items
+  const items = r.lineItems || [];
+  document.getElementById('receipt-items').innerHTML = items.length === 0
+    ? '<p class="text-sm text-gray-400 text-center py-4">No approved workers this week</p>'
+    : items.map(i => `
+        <div class="flex justify-between items-center text-sm border-b border-gray-50 pb-2">
+          <div>
+            <div class="font-semibold text-gray-800">${i.workerName || 'Worker'}</div>
+            <div class="text-xs text-gray-400">${i.jobTitle || ''}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-semibold text-gray-900">Rs. ${Number(i.workerWage).toLocaleString()}</div>
+            <div class="text-xs text-gray-400">10% = Rs. ${Number(i.commission).toLocaleString()}</div>
+          </div>
+        </div>`).join('');
+
+  // Pay section
+  const paySection = document.getElementById('pay-section');
+  if (isPaid) {
+    paySection.innerHTML = `<div class="bg-green-50 border border-green-200 rounded-xl px-5 py-4 text-center">
+      <div class="text-green-700 font-bold">✅ Payment Complete</div>
+      <div class="text-green-600 text-sm mt-1">Card ending in ${r.cardLast4} · Paid on ${r.paidAt ? new Date(r.paidAt).toLocaleDateString('en-LK') : ''}</div>
+    </div>`;
+  } else {
+    paySection.innerHTML = `<button onclick="openPayModal()"
+      class="w-full bg-primary hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-2">
+      💳 Pay Rs. ${Number(r.totalCommission).toLocaleString()} Now
+    </button>`;
+  }
+  document.getElementById('receipt-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openPayModal() {
+  const total = document.getElementById('receipt-total').textContent;
+  const week  = document.getElementById('receipt-week').textContent;
+  document.getElementById('modal-amount').textContent = total;
+  document.getElementById('modal-week').textContent   = week;
+  document.getElementById('pay-modal-error').classList.add('hidden');
+  document.getElementById('card-number').value  = '';
+  document.getElementById('card-expiry').value  = '';
+  document.getElementById('card-cvv').value     = '';
+  document.getElementById('card-holder').value  = '';
+  document.getElementById('pay-modal').classList.remove('hidden');
+}
+
+function closePayModal() { document.getElementById('pay-modal').classList.add('hidden'); }
+
+function formatCardNumber(input) {
+  let v = input.value.replace(/\D/g, '').substring(0, 16);
+  input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function formatExpiry(input) {
+  let v = input.value.replace(/\D/g, '').substring(0, 4);
+  if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2);
+  input.value = v;
+}
+
+async function submitPayment() {
+  const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+  const cardExpiry = document.getElementById('card-expiry').value;
+  const cardCvv    = document.getElementById('card-cvv').value;
+  const cardHolder = document.getElementById('card-holder').value.trim();
+
+  if (!cardNumber || !cardExpiry || !cardCvv || !cardHolder) {
+    showPayError('Please fill in all card details.'); return;
+  }
+  if (cardNumber.length !== 16) { showPayError('Card number must be 16 digits.'); return; }
+  if (!/^\d{2}\/\d{2}$/.test(cardExpiry)) { showPayError('Expiry must be MM/YY format.'); return; }
+  if (cardCvv.length !== 3) { showPayError('CVV must be 3 digits.'); return; }
+
+  const btn = document.getElementById('pay-btn');
+  btn.textContent = 'Processing...'; btn.disabled = true;
+
+  try {
+    const res  = await apiFetch(`/api/payments/pay/${currentReceiptId}`, {
+      method: 'POST',
+      body: JSON.stringify({ cardNumber, cardExpiry, cardCvv, cardHolder })
+    });
+    const json = await res.json();
+    if (res.ok) {
+      closePayModal();
+      showToast('✅ Payment successful! Commission paid.', 'success');
+      await generateReceipt();
+      await loadPaymentHistory();
+    } else {
+      showPayError(json.message || 'Payment failed. Please check your card details.');
+    }
+  } catch(e) { showPayError('Network error: ' + e.message); }
+  finally { btn.textContent = 'Pay Now'; btn.disabled = false; }
+}
+
+function showPayError(msg) {
+  const el = document.getElementById('pay-modal-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+async function loadPaymentHistory() {
+  try {
+    const res  = await apiFetch('/api/payments/my-receipts');
+    const json = await res.json();
+    const receipts = json.data || [];
+    const el = document.getElementById('payment-history');
+    if (receipts.length === 0) {
+      el.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">No payment history yet</div>';
+      return;
+    }
+    el.innerHTML = receipts.map(r => `
+      <div class="flex items-center justify-between px-2 py-3 border-b border-gray-50 last:border-0">
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">${r.weekStart} → ${r.weekEnd}</div>
+          <div class="text-xs text-gray-400 mt-0.5">Workers wages: Rs. ${Number(r.totalWorkerWages).toLocaleString()}</div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-sm ${r.paymentStatus === 'PAID' ? 'text-green-600' : 'text-amber-500'}">Rs. ${Number(r.totalCommission).toLocaleString()}</div>
+          <div class="text-xs mt-0.5 ${r.paymentStatus === 'PAID' ? 'text-green-500' : 'text-amber-400'} font-semibold">${r.paymentStatus}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── Staff Management ─────────────────────────────────────────────────────────
+let staffModalType = 'IT_ADMIN';
+
+async function loadItAdmins() {
+  const res  = await apiFetch('/api/employer/staff/it-admins');
+  const json = await res.json();
+  const list = json.data || [];
+  const tbody = document.getElementById('itAdminsBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-400 text-sm">No IT Admins yet. Add one to let them post jobs.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(u => `
+    <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+      <td class="py-3 px-3 font-semibold text-gray-800">${esc(u.name)}</td>
+      <td class="py-3 px-3 text-gray-500">${esc(u.email)}</td>
+      <td class="py-3 px-3 text-gray-500">${esc(u.phone||'—')}</td>
+      <td class="py-3 px-3 text-right">
+        <button onclick="removeItAdmin(${u.companyUserId})" class="text-xs text-red-500 hover:text-red-700 font-semibold border border-red-200 hover:border-red-400 px-3 py-1 rounded-lg transition">Remove</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function loadGuards() {
+  const res  = await apiFetch('/api/employer/staff/guards');
+  const json = await res.json();
+  const list = json.data || [];
+  const tbody = document.getElementById('guardsBody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400 text-sm">No security guards yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(g => `
+    <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+      <td class="py-3 px-3 font-semibold text-gray-800">${esc(g.name)}</td>
+      <td class="py-3 px-3 text-gray-500">${esc(g.email)}</td>
+      <td class="py-3 px-3 text-gray-500">${esc(g.phone||'—')}</td>
+      <td class="py-3 px-3">
+        ${g.isActive
+          ? '<span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">Active</span>'
+          : '<span class="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-0.5 rounded-full">Inactive</span>'}
+      </td>
+      <td class="py-3 px-3 text-right">
+        ${g.isActive ? `<button onclick="deactivateGuard(${g.guardId})" class="text-xs text-red-500 hover:text-red-700 font-semibold border border-red-200 hover:border-red-400 px-3 py-1 rounded-lg transition">Deactivate</button>` : '—'}
+      </td>
+    </tr>`).join('');
+}
+
+function openStaffModal(type) {
+  staffModalType = type;
+  document.getElementById('staffModalTitle').textContent = type === 'IT_ADMIN' ? '🖥️ Add IT Admin' : '🛡️ Add Security Guard';
+  ['staff-name','staff-email','staff-phone','staff-password'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('staffFormError').classList.add('hidden');
+  document.getElementById('staff-modal').classList.remove('hidden');
+  document.getElementById('staff-modal').classList.add('flex');
+}
+
+function closeStaffModal() {
+  document.getElementById('staff-modal').classList.add('hidden');
+  document.getElementById('staff-modal').classList.remove('flex');
+}
+
+async function submitStaff() {
+  const name     = document.getElementById('staff-name').value.trim();
+  const email    = document.getElementById('staff-email').value.trim();
+  const phone    = document.getElementById('staff-phone').value.trim();
+  const password = document.getElementById('staff-password').value;
+  const errEl    = document.getElementById('staffFormError');
+  errEl.classList.add('hidden');
+
+  if (!name || !email || !password) {
+    errEl.textContent = 'Name, email and password are required.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (password.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const btn = document.getElementById('staffSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  const url = staffModalType === 'IT_ADMIN' ? '/api/employer/staff/it-admins' : '/api/employer/staff/guards';
+  const res  = await apiFetch(url, { method: 'POST', body: JSON.stringify({ name, email, phone, password }) });
+  const json = await res.json();
+  btn.disabled = false; btn.textContent = 'Create Account';
+
+  if (res.ok) {
+    closeStaffModal();
+    showToast(staffModalType === 'IT_ADMIN' ? 'IT Admin created!' : 'Security guard created!', 'success');
+    if (staffModalType === 'IT_ADMIN') loadItAdmins(); else loadGuards();
+  } else {
+    errEl.textContent = `[${res.status}] ${json.message || 'Failed to create account.'}`;
+    errEl.classList.remove('hidden');
+  }
+}
+
+async function removeItAdmin(id) {
+  if (!confirm('Remove this IT Admin? They will lose access immediately.')) return;
+  const res = await apiFetch(`/api/employer/staff/it-admins/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('IT Admin removed', 'success'); loadItAdmins(); }
+  else showToast('Failed to remove', 'error');
+}
+
+async function deactivateGuard(id) {
+  if (!confirm('Deactivate this guard? They will not be able to log in.')) return;
+  const res = await apiFetch(`/api/employer/staff/guards/${id}`, { method: 'DELETE' });
+  if (res.ok) { showToast('Guard deactivated', 'success'); loadGuards(); }
+  else showToast('Failed to deactivate', 'error');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+</body>
+</html>

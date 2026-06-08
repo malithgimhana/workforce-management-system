@@ -1,0 +1,42 @@
+# Maven / Java build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.eclipse
+.project
+.classpath
+.settings/
+
+# Node / React
+flexiwork-frontend/node_modules/
+flexiwork-frontend/dist/
+flexiwork-frontend/.env
+
+# Environment / secrets
+.env
+.env.local
+*.env
+
+# Uploaded files (user data — don't push to GitHub)
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude AI session files
+.claude/
+
+# Logs
+*.log
+logs/
+
+# Spring Boot packaged jar (keep source, not the built artifact)
+*.jar.original

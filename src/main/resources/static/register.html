@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FlexiWork — Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #EB1700;
+      --red-600: #CE1500;
+      --red-700: #B31200;
+      --red-tint: #FDF1F0;
+      --red-tint-2: #FAE3E1;
+      --ctl-radius: 13px;
+      --ink: #1A1A1A;
+      --ink-2: #3D3D3D;
+      --muted: #767676;
+      --muted-2: #9A9A9A;
+      --line: #ECECEC;
+      --line-2: #E2E2E2;
+      --surface: #F6F6F4;
+      --white: #FFFFFF;
+      --shadow-sm: 0 1px 2px rgba(26,26,26,.05), 0 1px 3px rgba(26,26,26,.05);
+      --shadow-md: 0 6px 22px rgba(26,26,26,.07), 0 2px 6px rgba(26,26,26,.04);
+      --shadow-lg: 0 18px 50px rgba(26,26,26,.13);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      color: var(--ink); background: var(--surface);
+      -webkit-font-smoothing: antialiased; line-height: 1.5;
+      min-height: 100vh; padding: 44px 20px 64px;
+      position: relative; overflow-x: hidden;
+    }
+
+    /* ---------- BACKGROUND ---------- */
+    .bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bg-wash {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(680px 460px at 88% -6%, rgba(235,23,0,.2) 0%, transparent 62%),
+        radial-gradient(620px 520px at 4% 108%, rgba(235,23,0,.14) 0%, transparent 60%);
+    }
+    .bg-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(235,23,0,.14) 1px, transparent 1.6px);
+      background-size: 26px 26px;
+      -webkit-mask-image: radial-gradient(120% 120% at 50% 35%, #000 38%, transparent 78%);
+      mask-image: radial-gradient(120% 120% at 50% 35%, #000 38%, transparent 78%);
+    }
+    .bg-cards { position: absolute; inset: 0; }
+    .bg-jc {
+      position: absolute; width: 230px;
+      background: #fff; border: 1px solid var(--line);
+      border-radius: 16px; padding: 15px 17px;
+      box-shadow: 0 16px 40px rgba(26,26,26,.07);
+      opacity: .5; filter: saturate(.92);
+    }
+    .bg-jc .r1 { display: flex; justify-content: space-between; align-items: center; }
+    .bg-jc .bdg { font-size: 10px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+    .bg-jc .wg { font-size: 14px; font-weight: 800; letter-spacing: -.3px; }
+    .bg-jc .wg b { color: var(--red); }
+    .bg-jc h5 { font-size: 14.5px; font-weight: 700; letter-spacing: -.3px; margin-top: 9px; color: var(--ink); }
+    .bg-jc .co { font-size: 11.5px; font-weight: 700; color: var(--red); margin-top: 2px; }
+    .b-factory  { background: #fce8e6; color: #C8120A; }
+    .b-restaurant { background: #FFF4E5; color: #B7791F; }
+    .b-retail   { background: #E8F6EF; color: #1F8A5B; }
+    .jA { top: 8%;  left: 6%;   transform: rotate(-7deg); animation: floatA 9s   ease-in-out infinite; }
+    .jB { top: 60%; left: 3%;   transform: rotate( 5deg); animation: floatB 10.5s ease-in-out infinite; }
+    .jC { top: 14%; right: 5%;  transform: rotate( 6deg); animation: floatB 9.6s ease-in-out infinite; }
+    .jD { top: 66%; right: 6%;  transform: rotate(-5deg); animation: floatA 11s   ease-in-out infinite; }
+    @keyframes floatA { 0%,100%{ transform: translateY(0)   rotate(-7deg);} 50%{ transform: translateY(-14px) rotate(-7deg);} }
+    @keyframes floatB { 0%,100%{ transform: translateY(0)   rotate( 5deg);} 50%{ transform: translateY(-16px) rotate( 5deg);} }
+    @media (max-width: 980px) { .bg-cards { display: none; } }
+    @media (prefers-reduced-motion: reduce) { .bg-jc { animation: none; } }
+
+    a { text-decoration: none; color: var(--red); font-weight: 700; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; border: none; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ---------- CARD ---------- */
+    .card {
+      width: 100%; max-width: 540px; margin: 0 auto;
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: 20px; box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    /* red header band */
+    .card-head {
+      position: relative; overflow: hidden;
+      background: linear-gradient(160deg, var(--red) 0%, var(--red-600) 60%, var(--red-700) 100%);
+      color: #fff; padding: 30px 34px 64px; text-align: center;
+    }
+    .card-head::after {
+      content: ""; position: absolute; inset: 0;
+      background-image: radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.4px);
+      background-size: 24px 24px;
+    }
+    .card-head > * { position: relative; z-index: 2; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: #fff; color: var(--red);
+      display: grid; place-items: center; font-weight: 800; font-size: 15px; letter-spacing: -.5px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.18);
+    }
+    .brand-name { font-weight: 800; font-size: 21px; letter-spacing: -.5px; }
+    .card-head h1 { margin-top: 18px; font-size: 27px; font-weight: 800; letter-spacing: -.7px; }
+    .card-head p  { margin-top: 6px; font-size: 14.5px; font-weight: 500; color: rgba(255,255,255,.9); }
+
+    /* avatar overlapping the band */
+    .avatar-wrap { margin: -44px auto 0; position: relative; z-index: 3; width: 96px; }
+    .avatar {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: var(--surface); border: 4px solid #fff;
+      box-shadow: var(--shadow-md);
+      display: grid; place-items: center; overflow: hidden;
+      cursor: pointer; transition: transform .15s;
+      position: relative;
+    }
+    .avatar:hover { transform: translateY(-2px); }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .avatar.has-img .ph { display: none; }
+    .avatar.has-img img { display: block; }
+    .avatar .ph { display: grid; place-items: center; color: var(--muted-2); }
+    .avatar-cam {
+      position: absolute; right: 0; bottom: 0; z-index: 4;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--red); color: #fff; border: 3px solid #fff;
+      display: grid; place-items: center; box-shadow: var(--shadow-sm);
+    }
+    .avatar-label { text-align: center; margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+
+    /* ---------- FORM ---------- */
+    .form { padding: 18px 34px 34px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { margin-top: 16px; }
+    .field > label {
+      display: block; font-size: 12.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-bottom: 7px;
+    }
+    .field .ctl { position: relative; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 14px 15px;
+      border: 1.5px solid var(--line-2); border-radius: var(--ctl-radius);
+      font-size: 15px; color: var(--ink); background: #fff; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field textarea { resize: vertical; min-height: 78px; }
+    .field input::placeholder, .field textarea::placeholder { color: var(--muted-2); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--red); box-shadow: 0 0 0 4px var(--red-tint);
+    }
+    .field select {
+      appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%239A9A9A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 13px center; padding-right: 42px;
+    }
+    .field select:invalid, .field select option[value=""] { color: var(--muted-2); }
+    .hint { margin-top: 7px; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+    .hint.err { color: var(--red); font-weight: 600; display: none; }
+    .hint.err.show { display: block; }
+    .field input.invalid, .field select.invalid, .field textarea.invalid { border-color: var(--red); }
+    .ctl .toggle {
+      position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+      background: transparent; color: var(--muted); padding: 8px; border-radius: 9px; display: grid; place-items: center;
+    }
+    .ctl .toggle:hover { color: var(--ink); background: var(--surface); }
+    .field input.pw { padding-right: 44px; }
+
+    .error-banner {
+      display: none; margin-top: 16px;
+      background: var(--red-tint); border: 1px solid var(--red-tint-2);
+      color: var(--red); font-size: 13.5px; font-weight: 600;
+      border-radius: 10px; padding: 12px 16px;
+    }
+    .error-banner.show { display: block; }
+
+    .btn-submit {
+      width: 100%; margin-top: 24px;
+      background: var(--red); color: #fff; font-weight: 700; font-size: 16px;
+      padding: 16px; border-radius: var(--ctl-radius);
+      transition: background .15s, transform .05s;
+      box-shadow: 0 8px 20px rgba(235,23,0,.24);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { background: var(--red-600); }
+    .btn-submit:active { transform: scale(.99); }
+    .btn-submit:disabled { opacity: .65; cursor: not-allowed; }
+
+    .btn-secondary {
+      display: block; width: 100%; margin-top: 12px; text-align: center;
+      background: #fff; color: var(--ink); font-weight: 700; font-size: 15px;
+      padding: 14px; border-radius: var(--ctl-radius); border: 1.5px solid var(--line-2);
+      transition: background .15s, border-color .15s;
+    }
+    .btn-secondary:hover { background: var(--surface); border-color: var(--muted-2); text-decoration: none; }
+
+    .legal { margin-top: 18px; text-align: center; font-size: 12px; color: var(--muted-2); line-height: 1.55; }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1A1A1A; color: #fff; font-size: 14px; font-weight: 600;
+      padding: 12px 22px; border-radius: 50px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 9999;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity: 0; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: #1A6B3A; }
+    .toast.error   { background: var(--red); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .7s linear infinite; }
+
+    @media (max-width: 540px) {
+      body { padding: 24px 16px 48px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .card-head { padding: 26px 22px 60px; }
+      .form { padding: 16px 22px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Decorative background -->
+<div class="bg">
+  <div class="bg-wash"></div>
+  <div class="bg-dots"></div>
+  <div class="bg-cards">
+    <div class="bg-jc jA"><div class="r1"><span class="bdg b-factory">Factory</span><span class="wg"><b>LKR</b> 3,000</span></div><h5>Factory Worker</h5><div class="co">ABC Garments Ltd</div></div>
+    <div class="bg-jc jB"><div class="r1"><span class="bdg b-restaurant">Restaurant</span><span class="wg"><b>LKR</b> 1,600</span></div><h5>Barista</h5><div class="co">Bean &amp; Co Cafe</div></div>
+    <div class="bg-jc jC"><div class="r1"><span class="bdg b-retail">Retail</span><span class="wg"><b>LKR</b> 1,800</span></div><h5>Warehouse Packer</h5><div class="co">SwiftMart Logistics</div></div>
+    <div class="bg-jc jD"><div class="r1"><span class="bdg b-restaurant">Restaurant</span><span class="wg"><b>LKR</b> 1,300</span></div><h5>Restaurant Waiter</h5><div class="co">Kandy Restaurants</div></div>
+  </div>
+</div>
+
+<!-- Card -->
+<div class="card">
+
+  <!-- Red header -->
+  <div class="card-head">
+    <div class="brand">
+      <div class="brand-mark">FW</div>
+      <div class="brand-name">FlexiWork</div>
+    </div>
+    <h1>Create your account</h1>
+    <p>Join thousands earning daily across Sri Lanka.</p>
+  </div>
+
+  <!-- Avatar -->
+  <div class="avatar-wrap">
+    <div class="avatar" id="avatar" role="button" tabindex="0" aria-label="Upload profile photo">
+      <span class="ph">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+      </span>
+      <img id="avatarImg" alt="Profile preview"/>
+      <span class="avatar-cam">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h2.5l1.2-1.8h6.6L16.5 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z"/><circle cx="12" cy="13.5" r="3.2"/></svg>
+      </span>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" hidden/>
+  </div>
+  <div class="avatar-label" id="avatarLabel">Add a profile photo</div>
+
+  <!-- Form -->
+  <div class="form">
+    <div id="error-banner" class="error-banner"></div>
+
+    <form id="register-form" novalidate>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <div class="ctl"><input type="text" id="firstName" placeholder="First name" autocomplete="given-name"/></div>
+          <div class="hint err" id="err-firstName"></div>
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <div class="ctl"><input type="text" id="lastName" placeholder="Last name" autocomplete="family-name"/></div>
+          <div class="hint err" id="err-lastName"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Mobile phone number</label>
+        <div class="ctl"><input type="tel" id="phone" placeholder="07X XXX XXXX" inputmode="tel" autocomplete="tel"/></div>
+        <div class="hint err" id="err-phone"></div>
+      </div>
+
+      <div class="field">
+        <label for="nic">NIC number</label>
+        <div class="ctl"><input type="text" id="nic" placeholder="NIC number" maxlength="12" autocomplete="off"/></div>
+        <div class="hint" id="nic-hint">Accepts both old (9 digits + V) and new (12 digits) formats.</div>
+        <div class="hint err" id="err-nic"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label for="gender">Gender</label>
+          <div class="ctl">
+            <select id="gender" required>
+              <option value="" disabled selected>Select gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+              <option value="PREFER_NOT">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="hint err" id="err-gender"></div>
+        </div>
+        <div class="field">
+          <label for="district">District</label>
+          <div class="ctl">
+            <select id="district" required>
+              <option value="" disabled selected>Select district</option>
+              <option>Colombo</option>
+              <option>Gampaha</option>
+              <option>Kalutara</option>
+              <option>Hambantota</option>
+              <option>Galle</option>
+              <option>Kurunegala</option>
+              <option>Kandy</option>
+              <option>Matara</option>
+              <option>Ratnapura</option>
+              <option>Badulla</option>
+              <option>Jaffna</option>
+              <option>Trincomalee</option>
+            </select>
+          </div>
+          <div class="hint err" id="err-district"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address <span style="font-weight:500;text-transform:none;letter-spacing:0;font-size:12px;">(optional)</span></label>
+        <div class="ctl"><input type="email" id="email" placeholder="Optional but recommended" autocomplete="email"/></div>
+        <div class="hint err" id="err-email"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="ctl">
+          <input type="password" id="password" class="pw" placeholder="Create a password" autocomplete="new-password"/>
+          <button type="button" class="toggle" id="togglePw" aria-label="Show password">
+            <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="hint err" id="err-password"></div>
+      </div>
+
+      <div class="field">
+        <label for="address">Address</label>
+        <div class="ctl"><textarea id="address" placeholder="House no, street, city, district" autocomplete="street-address"></textarea></div>
+        <div class="hint err" id="err-address"></div>
+      </div>
+
+
+      <!-- ===== NIC Document Upload ===== -->
+      <div style="margin-top:24px; border-top:1.5px dashed #E2E2E2; padding-top:20px;">
+        <div style="font-size:13.5px; font-weight:700; color:#1A1A1A; margin-bottom:4px;">
+          📄 NIC Documents <span style="color:#EB1700;">*</span>
+          <span style="font-size:12px; font-weight:500; color:#EB1700;">Required for verification</span>
+        </div>
+        <div style="font-size:12.5px; color:#767676; margin-bottom:14px;">
+          Upload clear photos of both sides of your NIC. Admin will verify before you can apply for jobs.
+        </div>
+        <div class="grid-2">
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#767676;margin-bottom:6px;">NIC Front</div>
+            <div id="nic-front-box" onclick="document.getElementById('nic-front-input').click()" style="border:2px dashed #E2E2E2;border-radius:12px;padding:18px 10px;text-align:center;cursor:pointer;background:#F6F6F4;transition:border-color .15s,background .15s;">
+              <input type="file" id="nic-front-input" accept="image/*,application/pdf" hidden onchange="previewNic(this,'nic-front-preview','nic-front-box','nic-front-lbl')"/>
+              <img id="nic-front-preview" src="" alt="" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:8px;margin-bottom:6px;"/>
+              <div style="color:#9A9A9A;font-size:12px;font-weight:600;" id="nic-front-lbl">📷 Tap to upload front</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#767676;margin-bottom:6px;">NIC Back</div>
+            <div id="nic-back-box" onclick="document.getElementById('nic-back-input').click()" style="border:2px dashed #E2E2E2;border-radius:12px;padding:18px 10px;text-align:center;cursor:pointer;background:#F6F6F4;transition:border-color .15s,background .15s;">
+              <input type="file" id="nic-back-input" accept="image/*,application/pdf" hidden onchange="previewNic(this,'nic-back-preview','nic-back-box','nic-back-lbl')"/>
+              <img id="nic-back-preview" src="" alt="" style="display:none;width:100%;max-height:80px;object-fit:cover;border-radius:8px;margin-bottom:6px;"/>
+              <div style="color:#9A9A9A;font-size:12px;font-weight:600;" id="nic-back-lbl">📷 Tap to upload back</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ===== END NIC Upload ===== -->
+      <button type="submit" class="btn-submit" id="register-btn">Create account</button>
+      <a href="/login.html" class="btn-secondary">I already have an account</a>
+
+      <p class="legal">By creating an account you agree to FlexiWork's <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a>.</p>
+
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/api.js"></script>
+<script>
+  let photoFile = null;
+
+  // Avatar upload
+  const avatarEl    = document.getElementById('avatar');
+  const photoInput  = document.getElementById('photoInput');
+  const avatarImg   = document.getElementById('avatarImg');
+  const avatarLabel = document.getElementById('avatarLabel');
+
+  avatarEl.addEventListener('click', () => photoInput.click());
+  avatarEl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); photoInput.click(); } });
+  photoInput.addEventListener('change', () => {
+    const f = photoInput.files[0];
+    if (!f) return;
+    photoFile = f;
+    avatarImg.src = URL.createObjectURL(f);
+    avatarEl.classList.add('has-img');
+    avatarLabel.textContent = 'Photo added — tap to change';
+  });
+
+  // NIC preview
+  function previewNic(input, previewId, boxId, lblId) {
+    const file = input.files[0];
+    if (!file) return;
+    const box = document.getElementById(boxId);
+    const lbl = document.getElementById(lblId);
+    const img = document.getElementById(previewId);
+    if (file.type.startsWith('image/')) {
+      img.src = URL.createObjectURL(file);
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+    lbl.textContent = '✅ ' + file.name;
+    lbl.style.color = '#16a34a';
+    box.style.borderColor = '#EB1700';
+    box.style.background = '#FFF0EE';
+  }
+
+  // Password toggle
+  const pwInput = document.getElementById('password');
+  const eyeIcon = document.getElementById('eyeIcon');
+  document.getElementById('togglePw').addEventListener('click', () => {
+    const show = pwInput.type === 'password';
+    pwInput.type = show ? 'text' : 'password';
+    eyeIcon.innerHTML = show
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  // Toast helper
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.className = 'toast ' + type, 3000);
+  }
+
+  // Error helpers
+  function clearErrors() {
+    document.querySelectorAll('.hint.err').forEach(el => { el.textContent = ''; el.classList.remove('show'); });
+    document.querySelectorAll('input.invalid, select.invalid, textarea.invalid').forEach(el => el.classList.remove('invalid'));
+    const banner = document.getElementById('error-banner');
+    banner.textContent = ''; banner.classList.remove('show');
+  }
+
+  function showFieldError(field, msg) {
+    const el = document.getElementById('err-' + field);
+    if (el) { el.textContent = msg; el.classList.add('show'); }
+    const input = document.getElementById(field);
+    if (input) input.classList.add('invalid');
+  }
+
+  function showBanner(msg) {
+    const banner = document.getElementById('error-banner');
+    banner.textContent = msg; banner.classList.add('show');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Submit
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const btn = document.getElementById('register-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="spin" width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,.3)" stroke-width="4"/><path d="M4 12a8 8 0 018-8" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg> Creating account…';
+
+    const payload = {
+      firstName : document.getElementById('firstName').value.trim(),
+      lastName  : document.getElementById('lastName').value.trim(),
+      phone     : document.getElementById('phone').value.trim(),
+      nic       : document.getElementById('nic').value.trim(),
+      gender    : document.getElementById('gender').value,
+      district  : document.getElementById('district').value,
+      email     : document.getElementById('email').value.trim() || null,
+      address   : document.getElementById('address').value.trim(),
+      password  : document.getElementById('password').value
+    };
+
+    // Send everything as one multipart request
+    const fd = new FormData();
+    Object.entries(payload).forEach(([k, v]) => { if (v != null) fd.append(k, v); });
+    if (photoFile) fd.append('photo', photoFile);
+    const nicFront = document.getElementById('nic-front-input').files[0];
+    const nicBack  = document.getElementById('nic-back-input').files[0];
+    if (nicFront) fd.append('nicFront', nicFront);
+    if (nicBack)  fd.append('nicBack',  nicBack);
+
+    const res  = await fetch('/api/auth/register', { method: 'POST', body: fd, credentials: 'include' });
+    const json = await res.json();
+
+    if (res.ok) {
+      showToast('Account created! Your documents are pending review. Please sign in.', 'success');
+      setTimeout(() => window.location.href = '/login.html', 1500);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = 'Create account';
+      if (json.errors) {
+        Object.entries(json.errors).forEach(([k, v]) => showFieldError(k, v));
+      } else {
+        showBanner(json.message || 'Registration failed. Please try again.');
+      }
+    }
+  });
+</script>
+</body>
+</html>
